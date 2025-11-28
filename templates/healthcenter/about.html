@@ -12,17 +12,17 @@
             <div class="card shadow">
                 <div class="card-body p-5">
                     <h2 class="mb-4">{{ about.title }}</h2>
-                    <p class="lead">{{ about.description }}</p>
-                    
+                    <div class="lead">{{ about.description|safe }}</div>
+
                     <h4 class="mt-4 mb-3">Our Mission</h4>
-                    <p>{{ about.mission|linebreaks }}</p>
-                    
+                    <div>{{ about.mission|safe }}</div>
+
                     <h4 class="mt-4 mb-3">Our Vision</h4>
-                    <p>{{ about.vision|linebreaks }}</p>
-                    
+                    <div>{{ about.vision|safe }}</div>
+
                     {% if about.history %}
                     <h4 class="mt-4 mb-3">Our History</h4>
-                    <p>{{ about.history|linebreaks }}</p>
+                    <div>{{ about.history|safe }}</div>
                     {% endif %}
                     
                     {% if about.established_year %}

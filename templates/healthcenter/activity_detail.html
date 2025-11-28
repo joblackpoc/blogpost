@@ -1,0 +1,141 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}{{ activity.title }} | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:home' %}">Home</a></li>
+            <li class="breadcrumb-item active">{{ activity.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                {% if activity.image %}
+                <img src="{{ activity.image.url }}" class="card-img-top" alt="{{ activity.title }}">
+                {% endif %}
+                <div class="card-body p-5">
+                    <h1 class="mb-4">
+                        <i class="fas fa-calendar-check text-primary me-3"></i>{{ activity.title }}
+                    </h1>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-calendar text-primary me-2"></i><strong>Date:</strong>
+                                {{ activity.activity_date|date:"F d, Y" }}
+                            </p>
+                        </div>
+                        {% if activity.activity_time %}
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i><strong>Time:</strong>
+                                {{ activity.activity_time }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i><strong>Location:</strong>
+                                {{ activity.get_location_display }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-toggle-on text-primary me-2"></i><strong>Status:</strong>
+                                {% if activity.is_upcoming %}
+                                <span class="badge bg-success">Upcoming</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Past Event</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Activity Description</h4>
+                    <div>{{ activity.description|safe }}</div>
+
+                    {% if activity.is_registration_required %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i><strong>Registration Required</strong>
+                        {% if activity.max_participants %}
+                        <p class="mb-0 mt-2">Maximum participants: {{ activity.max_participants }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if activity.contact_person or activity.contact_phone %}
+                    <h4 class="mt-4 mb-3">Contact Information</h4>
+                    {% if activity.contact_person %}
+                    <p class="mb-2">
+                        <i class="fas fa-user text-primary me-2"></i><strong>Contact Person:</strong>
+                        {{ activity.contact_person }}
+                    </p>
+                    {% endif %}
+                    {% if activity.contact_phone %}
+                    <p class="mb-2">
+                        <i class="fas fa-phone text-primary me-2"></i><strong>Phone:</strong>
+                        <a href="tel:{{ activity.contact_phone }}">{{ activity.contact_phone }}</a>
+                    </p>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% if perms.healthcenter.change_activity %}
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Activity</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{{ activity.get_update_url }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Edit Activity
+                        </a>
+                        <a href="{{ activity.get_delete_url }}" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Delete Activity
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Event Details</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-calendar-day text-muted me-2"></i>
+                            {{ activity.activity_date|date:"l, F d, Y" }}
+                        </li>
+                        {% if activity.activity_time %}
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-muted me-2"></i>
+                            {{ activity.activity_time }}
+                        </li>
+                        {% endif %}
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                            {{ activity.get_location_display }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Need Help?</h5>
+                    <p class="card-text">Contact us for more information about this activity.</p>
+                    <a href="{% url 'healthcenter:contact' %}" class="btn btn-success w-100">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

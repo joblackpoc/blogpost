@@ -1,43 +1,486 @@
 {% extends 'healthcenter/base_healthcenter.html' %}
 
-{% block title %}Locations | Public Health Center{% endblock %}
+{% block title %}แผนที่ตั้ง | รพ.สต.หาดทรายรี{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h1 class="text-center mb-5">Our Locations</h1>
-    
-    <div class="row g-4">
-        {% for location in locations %}
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        {{ location.name }}
-                        {% if location.is_main_office %}<span class="badge bg-success">Main Office</span>{% endif %}
-                    </h5>
-                    {% if location.image %}<img src="{{ location.image.url }}" class="img-fluid mb-3" alt="{{ location.name }}">{% endif %}
-                    <p><i class="fas fa-map-marker-alt text-success me-2"></i>{{ location.address }}</p>
-                    <p><i class="fas fa-phone text-success me-2"></i>{{ location.phone }}</p>
-                    <p><i class="fas fa-clock text-success me-2"></i>{{ location.working_hours }}</p>
-                    <a href="{{ location.get_google_maps_url }}" target="_blank" class="btn btn-success btn-sm mb-3">
-                        <i class="fas fa-map-marked-alt me-1"></i>View on Google Maps
-                    </a>
+<style>
+    /* Modern Material Design Styles */
+    .locations-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0 60px;
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+    }
 
-                    {% if location.get_google_maps_embed_url %}
-                    <div class="ratio ratio-16x9 mt-3">
-                        <iframe src="{{ location.get_google_maps_embed_url }}"
-                                style="border:0;"
-                                allowfullscreen=""
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
+    .locations-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+    }
+
+    .locations-hero h1 {
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        margin: 0;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    .locations-hero p {
+        color: rgba(255,255,255,0.95);
+        font-size: 1.2rem;
+        margin-top: 15px;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    /* Fade-in animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Location Card Styles */
+    .location-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 40px;
+        animation: fadeIn 0.6s ease forwards;
+        opacity: 0;
+        border: none;
+    }
+
+    .location-card:nth-child(1) { animation-delay: 0.1s; }
+    .location-card:nth-child(2) { animation-delay: 0.2s; }
+    .location-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .location-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .location-card-body {
+        padding: 0;
+    }
+
+    .location-image-wrapper {
+        position: relative;
+        height: 700px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .location-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.6s ease;
+    }
+
+    .location-card:hover .location-image {
+        transform: scale(1.08);
+    }
+
+    .location-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+    }
+
+    .location-content {
+        padding: 35px;
+    }
+
+    .location-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+    }
+
+    .location-title i {
+        color: #667eea;
+        margin-right: 12px;
+        font-size: 1.5rem;
+    }
+
+    .location-info-grid {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .location-info-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px;
+        background: #f9fafb;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .location-info-item:hover {
+        background: #f3f4f6;
+        transform: translateX(5px);
+    }
+
+    .location-info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+        color: white;
+    }
+
+    .icon-address { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); }
+    .icon-phone { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .icon-clock { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .icon-email { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+
+    .location-info-content {
+        flex: 1;
+    }
+
+    .location-info-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .location-info-text {
+        color: #1f2937;
+        font-size: 1rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .location-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .btn-modern {
+        padding: 12px 28px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-outline-modern:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .map-container {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .map-container:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .map-container iframe {
+        border: none;
+        border-radius: 16px;
+    }
+
+    .map-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .map-link:hover {
+        color: #764ba2;
+        gap: 10px;
+    }
+
+    .no-locations {
+        text-align: center;
+        padding: 80px 20px;
+        color: #6b7280;
+    }
+
+    .no-locations i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .locations-hero h1 {
+            font-size: 2rem;
+        }
+
+        .locations-hero p {
+            font-size: 1rem;
+        }
+
+        .location-image-wrapper {
+            height: 450px;
+        }
+
+        .location-content {
+            padding: 25px;
+        }
+
+        .location-title {
+            font-size: 1.4rem;
+        }
+
+        .location-actions {
+            flex-direction: column;
+        }
+
+        .btn-modern {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .location-image-wrapper {
+            height: 550px;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="locations-hero">
+    <div class="container text-center">
+        <h1><i class="fas fa-map-marker-alt me-3"></i>สถานที่ตั้งของเรา</h1>
+        <p>ค้นหาสถานที่ตั้งและข้อมูลการติดต่อของเรา</p>
+    </div>
+</div>
+
+<!-- Locations Grid -->
+<div class="container mb-5">
+    <div class="row">
+        {% for location in locations %}
+        <div class="col-lg-12">
+            <div class="location-card">
+                <div class="location-card-body">
+                    <!-- Location Image -->
+                    <div class="location-image-wrapper">
+                        {% if location.image %}
+                        <img src="{{ location.image.url }}" class="location-image" alt="{{ location.name }}">
+                        {% else %}
+                        <div class="location-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-hospital-alt" style="font-size: 6rem; color: rgba(255,255,255,0.3);"></i>
+                        </div>
+                        {% endif %}
+
+                        {% if location.is_main_office %}
+                        <div class="location-badge">
+                            <i class="fas fa-star me-1"></i>สำนักงานใหญ่
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
+
+                    <!-- Location Content -->
+                    <div class="location-content">
+                        <h2 class="location-title">
+                            <i class="fas fa-hospital"></i>
+                            {{ location.name }}
+                        </h2>
+
+                        <!-- Info Grid -->
+                        <div class="location-info-grid">
+                            <div class="location-info-item">
+                                <div class="location-info-icon icon-address">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">ที่อยู่</div>
+                                    <p class="location-info-text">{{ location.address }}</p>
+                                </div>
+                            </div>
+
+                            <div class="location-info-item">
+                                <div class="location-info-icon icon-phone">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">โทรศัพท์</div>
+                                    <p class="location-info-text">{{ location.phone }}</p>
+                                </div>
+                            </div>
+
+                            <div class="location-info-item">
+                                <div class="location-info-icon icon-clock">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">เวลาทำการ</div>
+                                    <p class="location-info-text">{{ location.working_hours }}</p>
+                                </div>
+                            </div>
+
+                            {% if location.email %}
+                            <div class="location-info-item">
+                                <div class="location-info-icon icon-email">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">อีเมล</div>
+                                    <p class="location-info-text">{{ location.email }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="location-actions">
+                            <a href="{{ location.get_google_maps_url }}" target="_blank" class="btn-modern btn-primary-gradient">
+                                <i class="fas fa-directions"></i>
+                                เปิดดูแผนที่นำทาง
+                            </a>
+                            <a href="tel:{{ location.phone }}" class="btn-modern btn-outline-modern">
+                                <i class="fas fa-phone"></i>
+                                โทรติดต่อ
+                            </a>
+                        </div>
+
+                        <!-- Embedded Map -->
+                        <div class="map-container">
+                            {% if location.get_google_maps_embed_url %}
+                            <div class="ratio ratio-16x9">
+                                <iframe src="{{ location.get_google_maps_embed_url }}"
+                                        allowfullscreen=""
+                                        loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                            {% else %}
+                            <div class="ratio ratio-16x9">
+                                <iframe src="{{ location.get_openstreetmap_embed_url }}"
+                                        allowfullscreen=""
+                                        loading="lazy">
+                                </iframe>
+                            </div>
+                            <a href="https://www.openstreetmap.org/?mlat={{ location.latitude }}&mlon={{ location.longitude }}#map=15/{{ location.latitude }}/{{ location.longitude }}"
+                               target="_blank"
+                               class="map-link">
+                                <i class="fas fa-external-link-alt"></i>
+                                ดูแผนที่ขนาดใหญ่
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p class="text-center text-muted">No locations available.</p>
+        <div class="col-12">
+            <div class="no-locations">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3>ไม่พบข้อมูลสถานที่</h3>
+                <p class="text-muted">ขณะนี้ยังไม่มีข้อมูลสถานที่ให้บริการ</p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </div>

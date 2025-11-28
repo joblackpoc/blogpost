@@ -27,6 +27,13 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'healthcenter:team' %}">Our Team</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'healthcenter:locations' %}">Locations</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'healthcenter:contact' %}">Contact</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'healthcenter:dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:register' %}"><i class="fas fa-user-plus"></i> Register</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

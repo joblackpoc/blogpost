@@ -16,8 +16,10 @@
                     {% elif announcement.priority == 'high' %}<span class="badge bg-warning">High Priority</span>{% endif %}
                     <h5 class="card-title mt-2">{{ announcement.title }}</h5>
                     <p class="text-muted small"><i class="fas fa-calendar me-2"></i>{{ announcement.published_date|date:"F d, Y" }}</p>
-                    <p>{{ announcement.content|truncatewords:30 }}</p>
-                    <a href="{% url 'healthcenter:announcement_detail' announcement.slug %}" class="btn btn-success">Read Full Announcement</a>
+                    <p>{{ announcement.content|striptags|truncatewords:30 }}</p>
+                    {% if announcement.slug %}
+                        <a href="{% url 'healthcenter:announcement_detail' announcement.slug %}" class="btn btn-success">Read Full Announcement</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

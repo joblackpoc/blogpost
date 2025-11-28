@@ -46,8 +46,8 @@
                     {% if about %}
                     <p><i class="fas fa-phone text-success me-2"></i> {{ about.phone }}</p>
                     <p><i class="fas fa-envelope text-success me-2"></i> {{ about.email }}</p>
-                    <p><i class="fas fa-map-marker-alt text-success me-2"></i> {{ about.address }}</p>
-                    <p><i class="fas fa-clock text-success me-2"></i> {{ about.working_hours|linebreaks }}</p>
+                    <div><i class="fas fa-map-marker-alt text-success me-2"></i> {{ about.address|safe }}</div>
+                    <div><i class="fas fa-clock text-success me-2"></i> {{ about.working_hours|safe }}</div>
                     {% endif %}
                 </div>
             </div>

@@ -21,7 +21,9 @@
                     <h5 class="card-title">{{ service.name }}</h5>
                     <p class="card-text">{{ service.description }}</p>
                     {% if service.schedule %}<p class="text-muted small"><i class="fas fa-clock me-1"></i>{{ service.schedule }}</p>{% endif %}
-                    <a href="{% url 'healthcenter:service_detail' service.slug %}" class="btn btn-success">View Details</a>
+                    {% if service.slug %}
+                        <a href="{% url 'healthcenter:service_detail' service.slug %}" class="btn btn-success">View Details</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

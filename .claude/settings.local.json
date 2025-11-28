@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(python manage.py:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(findstr:*)",
+      "Bash(test:*)",
+      "Bash(del healthcentermigrations0004_position_alter_teammember_custom_position_and_more.py)"
     ],
     "deny": [],
     "ask": []

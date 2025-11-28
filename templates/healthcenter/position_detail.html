@@ -1,0 +1,119 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}{{ position.name_th }} | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:position_list' %}">Positions</a></li>
+            <li class="breadcrumb-item active">{{ position.name_th }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="mb-4">
+                        <i class="fas fa-id-badge text-primary me-3"></i>{{ position.name_th }}
+                    </h1>
+                    <h4 class="text-muted mb-4">{{ position.name_en }}</h4>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-2"><i class="fas fa-sort text-primary me-2"></i><strong>Display Order:</strong> {{ position.order }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-toggle-on text-primary me-2"></i><strong>Status:</strong>
+                                {% if position.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if position.team_members.all %}
+                    <h4 class="mt-4 mb-3">Team Members with this Position</h4>
+                    <div class="list-group">
+                        {% for member in position.team_members.all %}
+                        <a href="{{ member.get_absolute_url }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ member.name }}</h6>
+                                {% if member.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </div>
+                            {% if member.specialization %}
+                            <p class="mb-1 text-muted small">{{ member.specialization }}</p>
+                            {% endif %}
+                            {% if member.email %}
+                            <small class="text-muted">
+                                <i class="fas fa-envelope me-1"></i>{{ member.email }}
+                            </small>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>No team members currently assigned to this position.
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <p class="text-muted small">
+                            <i class="fas fa-calendar me-1"></i>Created: {{ position.created_at|date:"F d, Y" }}
+                            {% if position.updated_at %}
+                            | Updated: {{ position.updated_at|date:"F d, Y" }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% if perms.healthcenter.change_position %}
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Position</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{{ position.get_update_url }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Edit Position
+                        </a>
+                        <a href="{{ position.get_delete_url }}" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Delete Position
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Navigation</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'healthcenter:position_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>All Positions
+                        </a>
+                        <a href="{% url 'healthcenter:teammember_list' %}" class="btn btn-outline-success">
+                            <i class="fas fa-users me-2"></i>All Team Members
+                        </a>
+                        <a href="{% url 'healthcenter:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

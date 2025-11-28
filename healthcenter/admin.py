@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import About, Service, Announcement, TeamMember, Location, ContactMessage
+from .models import About, Service, Announcement, TeamMember, Location, ContactMessage, Position, Activity
 
 
 @admin.register(About)
@@ -66,6 +66,22 @@ class AnnouncementAdmin(admin.ModelAdmin):
         return qs.select_related()
 
 
+@admin.register(Position)
+class PositionAdmin(admin.ModelAdmin):
+    list_display = ['name_th', 'name_en', 'order', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['name_th', 'name_en']
+    list_editable = ['order', 'is_active']
+    fieldsets = (
+        ('Position Names', {
+            'fields': ('name_th', 'name_en')
+        }),
+        ('Display Settings', {
+            'fields': ('order', 'is_active')
+        }),
+    )
+
+
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ['name', 'get_display_position', 'email', 'phone', 'is_active', 'order']
@@ -103,7 +119,7 @@ class LocationAdmin(admin.ModelAdmin):
             'fields': ('address', 'phone', 'email', 'working_hours')
         }),
         ('Google Maps Integration', {
-            'fields': ('google_maps_embed', 'latitude', 'longitude'),
+            'fields': ('latitude', 'longitude'),
             'description': '''<strong>Option 1 (Recommended):</strong> Paste the complete Google Maps embed URL from iframe src attribute.<br>
             Go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a>, search for your location,
             click "Share" → "Embed a map" → Copy the URL from src="..." and paste below.<br><br>
@@ -140,3 +156,33 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
+
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ['title', 'activity_date', 'activity_time', 'get_location_display', 'is_active', 'created_at']
+    list_filter = ['is_active', 'activity_date', 'location', 'is_registration_required']
+    search_fields = ['title', 'description', 'contact_person']
+    prepopulated_fields = {'slug': ('title',)}
+    list_editable = ['is_active']
+    date_hierarchy = 'activity_date'
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'slug', 'description', 'image')
+        }),
+        ('Date & Time', {
+            'fields': ('activity_date', 'activity_time')
+        }),
+        ('Location', {
+            'fields': ('location', 'custom_location')
+        }),
+        ('Contact Information', {
+            'fields': ('contact_person', 'contact_phone')
+        }),
+        ('Registration', {
+            'fields': ('is_registration_required', 'max_participants')
+        }),
+        ('Settings', {
+            'fields': ('is_active',)
+        }),
+    )

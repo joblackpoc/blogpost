@@ -131,6 +131,7 @@ CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.ckeditor.com", "https
 CSP_IMG_SRC = ("'self'", "data:", "https:")
 CSP_FONT_SRC = ("'self'", "https://cdn.ckeditor.com", "https://cdnjs.cloudflare.com")
 CSP_CONNECT_SRC = ("'self'",)
+CSP_FRAME_SRC = ("'self'", "https://www.google.com", "https://www.openstreetmap.org")  # Allow Google Maps and OpenStreetMap iframe embedding
 CSP_FRAME_ANCESTORS = ("'none'",)
 CSP_FORM_ACTION = ("'self'",)
 CSP_BASE_URI = ("'self'",)
@@ -199,8 +200,10 @@ CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 CKEDITOR_UPLOAD_PATH = "uploads/"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# Google Maps API Configuration
+GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default=None)
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'blog:post_list'
+LOGIN_REDIRECT_URL = 'healthcenter:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
 ADMIN_HONEYPOT_EMAIL_ADMINS = True
