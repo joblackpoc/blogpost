@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<article>
+<h1>{{ post.title }}</h1>
+<p class="text-muted">By {{ post.author.username }} | {{ post.published_at|date:"F d, Y" }} | Views: {{ post.views }}</p>
+{% if post.featured_image %}<img src="{{ post.featured_image.url }}" class="img-fluid mb-3">{% endif %}
+<div>{{ post.content|safe }}</div>
+
+<div class="my-3">
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'blog:post_like' post.slug %}" class="d-inline like-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm {% if user_has_liked %}btn-primary{% else %}btn-outline-primary{% endif %} like-btn" data-slug="{{ post.slug }}">
+            <span class="like-icon">{% if user_has_liked %}&#10084;{% else %}&#9825;{% endif %}</span>
+            <span class="like-text">{% if user_has_liked %}Unlike{% else %}Like{% endif %}</span>
+        </button>
+    </form>
+    {% endif %}
+    <span class="ms-2 like-count">{{ total_likes }} {% if total_likes == 1 %}like{% else %}likes{% endif %}</span>
+</div>
+
+{% if user == post.author or user.is_staff %}
+<a href="{% url 'blog:post_edit' post.slug %}" class="btn btn-warning">Edit</a>
+<a href="{% url 'blog:post_delete' post.slug %}" class="btn btn-danger">Delete</a>
+{% endif %}
+</article>
+<hr>
+<h3>Comments</h3>
+{% if user.is_authenticated %}
+<form method="post">{% csrf_token %}
+{{ form.content }}
+<button type="submit" class="btn btn-primary mt-2">Post Comment</button>
+</form>
+{% else %}<p><a href="{% url 'accounts:login' %}">Login to comment</a></p>{% endif %}
+<hr>
+{% for comment in comments %}
+<div class="mb-3">
+<strong>{{ comment.author.username }}</strong> - {{ comment.created_at|date:"M d, Y" }}
+<p>{{ comment.content|safe }}</p>
+{% if user == comment.author or user.is_staff %}
+<a href="{% url 'blog:comment_delete' comment.pk %}" class="btn btn-sm btn-danger">Delete</a>
+{% endif %}
+</div>
+{% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeForms = document.querySelectorAll('.like-form');
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const slug = this.querySelector('.like-btn').dataset.slug;
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/blog/post/${slug}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = this.querySelector('.like-btn');
+                    const icon = btn.querySelector('.like-icon');
+                    const text = btn.querySelector('.like-text');
+                    const countSpan = document.querySelector('.like-count');
+
+                    if (data.liked) {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                        icon.innerHTML = '&#10084;';
+                        text.textContent = 'Unlike';
+                    } else {
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-primary');
+                        icon.innerHTML = '&#9825;';
+                        text.textContent = 'Like';
+                    }
+
+                    countSpan.textContent = `${data.total_likes} ${data.total_likes === 1 ? 'like' : 'likes'}`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

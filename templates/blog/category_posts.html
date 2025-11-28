@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Category: {{ category.name }}</h2>
+<p>{{ category.description }}</p>
+{% for post in page_obj %}
+<div class="card mb-3"><div class="card-body">
+<h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+</div></div>
+{% endfor %}
+{% endblock %}

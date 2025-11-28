@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2><i class="fas fa-user"></i> Profile</h2>
+<div class="card"><div class="card-body">
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>MFA:</strong> {% if mfa_enabled %}<span class="text-success">Enabled</span>{% else %}<span class="text-warning">Disabled</span>{% endif %}</p>
+<a href="{% url 'accounts:mfa_setup' %}" class="btn btn-primary">MFA Settings</a>
+</div></div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category - SecureBlog{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Delete Category</h2>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Are you sure you want to delete the category "<strong>{{ category.name }}</strong>"?
+        </div>
+        {% if category.posts.count > 0 %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            This category has <strong>{{ category.posts.count }}</strong> post{{ category.posts.count|pluralize }}.
+            Deleting this category will set those posts to have no category.
+        </div>
+        {% endif %}
+        <form method="post">{% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'blog:category_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1><i class="fas fa-shield-alt"></i> Security Dashboard</h1>
+<div class="row">
+<div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body">
+<h5>Events Today</h5><h2>{{ total_events_today }}</h2>
+</div></div></div>
+</div>
+<div class="card mt-4"><div class="card-header"><h5>Active Security Features</h5></div>
+<div class="card-body"><ul>
+<li>XSS Protection</li><li>SQL Injection Prevention</li>
+<li>CSRF Protection</li><li>Rate Limiting</li>
+<li>File Upload Security</li><li>MFA Support</li>
+</ul></div></div>
+{% endblock %}
