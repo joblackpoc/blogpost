@@ -46,5 +46,104 @@ if (typeof window.CKEDITOR_UPLOAD_URL !== 'undefined') {
         window.CKEDITOR_CSRF_TOKEN = csrftoken;
     }
 }
+
+// Link preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const linkUrlInput = document.getElementById('id_link_url');
+    const linkTitleInput = document.getElementById('id_link_title');
+    const linkDescInput = document.getElementById('id_link_description');
+    const linkImageInput = document.getElementById('id_link_image');
+
+    if (!linkUrlInput) return;
+
+    let debounceTimer;
+    let previewContainer = document.createElement('div');
+    previewContainer.id = 'link-preview';
+    previewContainer.className = 'mt-3';
+    linkUrlInput.parentElement.appendChild(previewContainer);
+
+    // Function to update preview
+    function updatePreview() {
+        const url = linkUrlInput.value.trim();
+        const title = linkTitleInput ? linkTitleInput.value : '';
+        const desc = linkDescInput ? linkDescInput.value : '';
+        const image = linkImageInput ? linkImageInput.value : '';
+
+        if (!url) {
+            previewContainer.innerHTML = '';
+            return;
+        }
+
+        // If user has manually filled fields, show manual preview
+        if (title || desc || image) {
+            let previewHTML = '<div class="card border"><div class="bg-light p-2 small">Manual Preview</div>';
+            if (image) {
+                previewHTML += `<img src="${image}" class="card-img-top" alt="Preview" style="max-height: 200px; object-fit: cover;">`;
+            }
+            previewHTML += '<div class="card-body">';
+            if (title) {
+                previewHTML += `<h5 class="card-title">${title}</h5>`;
+            }
+            if (desc) {
+                previewHTML += `<p class="card-text text-muted">${desc.substring(0, 150)}...</p>`;
+            }
+            previewHTML += `<small class="text-muted">${url}</small>`;
+            previewHTML += '</div></div>';
+            previewContainer.innerHTML = previewHTML;
+            return;
+        }
+
+        // Otherwise try auto-fetch
+        previewContainer.innerHTML = '<div class="alert alert-info">Loading preview...</div>';
+
+        fetch('{% url "blog:fetch_link_preview" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: 'url=' + encodeURIComponent(url)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const metadata = data.data;
+                let previewHTML = '<div class="card border">';
+
+                if (metadata.image) {
+                    previewHTML += `<img src="${metadata.image}" class="card-img-top" alt="Preview" style="max-height: 200px; object-fit: cover;">`;
+                }
+
+                previewHTML += '<div class="card-body">';
+                if (metadata.title) {
+                    previewHTML += `<h5 class="card-title">${metadata.title}</h5>`;
+                }
+                if (metadata.description) {
+                    previewHTML += `<p class="card-text text-muted">${metadata.description.substring(0, 150)}...</p>`;
+                }
+                previewHTML += `<small class="text-muted">${url}</small>`;
+                previewHTML += '</div></div>';
+
+                previewContainer.innerHTML = previewHTML;
+            } else {
+                previewContainer.innerHTML = '<div class="alert alert-warning">Could not load preview automatically. Please fill in the preview fields manually below.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            previewContainer.innerHTML = '<div class="alert alert-warning">Could not load preview automatically. Please fill in the preview fields manually below.</div>';
+        });
+    }
+
+    linkUrlInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updatePreview, 1000);
+    });
+
+    // Update preview when manual fields change
+    if (linkTitleInput) linkTitleInput.addEventListener('input', updatePreview);
+    if (linkDescInput) linkDescInput.addEventListener('input', updatePreview);
+    if (linkImageInput) linkImageInput.addEventListener('input', updatePreview);
+});
 </script>
 {% endblock %}

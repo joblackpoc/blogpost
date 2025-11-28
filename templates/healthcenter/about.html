@@ -1,0 +1,54 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}About Us | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">About Us</h1>
+    
+    {% if about %}
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="mb-4">{{ about.title }}</h2>
+                    <p class="lead">{{ about.description }}</p>
+                    
+                    <h4 class="mt-4 mb-3">Our Mission</h4>
+                    <p>{{ about.mission|linebreaks }}</p>
+                    
+                    <h4 class="mt-4 mb-3">Our Vision</h4>
+                    <p>{{ about.vision|linebreaks }}</p>
+                    
+                    {% if about.history %}
+                    <h4 class="mt-4 mb-3">Our History</h4>
+                    <p>{{ about.history|linebreaks }}</p>
+                    {% endif %}
+                    
+                    {% if about.established_year %}
+                    <p class="mt-4"><strong>Established:</strong> {{ about.established_year }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if team_members %}
+    <h2 class="text-center mb-4">Our Team</h2>
+    <div class="row g-4">
+        {% for member in team_members %}
+        <div class="col-md-3">
+            <div class="card shadow text-center">
+                {% if member.photo %}<img src="{{ member.photo.url }}" class="card-img-top" alt="{{ member.name }}">{% endif %}
+                <div class="card-body">
+                    <h6>{{ member.name }}</h6>
+                    <p class="small text-muted">{{ member.get_display_position }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

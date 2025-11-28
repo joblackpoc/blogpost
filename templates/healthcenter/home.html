@@ -1,0 +1,310 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}Home | Public Health Center{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-success text-white py-5 mb-5">
+    <div class="container text-center">
+        <h1 class="display-3 fw-bold">{{ about.title|default:"Public Health Center" }}</h1>
+        <p class="lead mb-4">{{ about.description|default:"Providing quality healthcare services to our community" }}</p>
+        <a href="{% url 'healthcenter:services' %}" class="btn btn-light btn-lg me-2">Our Services</a>
+        <a href="{% url 'healthcenter:contact' %}" class="btn btn-outline-light btn-lg">Contact Us</a>
+    </div>
+</div>
+
+<!-- 1. About Section -->
+{% if about %}
+<section id="about" class="container mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <h2 class="display-5 fw-bold mb-4">About Us</h2>
+            <p class="lead text-muted">{{ about.description }}</p>
+
+            <div class="row g-3 mt-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-bullseye fa-2x text-success me-3"></i>
+                        <div>
+                            <h5>Our Mission</h5>
+                            <p class="small text-muted">{{ about.mission|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-eye fa-2x text-success me-3"></i>
+                        <div>
+                            <h5>Our Vision</h5>
+                            <p class="small text-muted">{{ about.vision|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'healthcenter:about' %}" class="btn btn-success mt-3">Learn More About Us</a>
+        </div>
+        <div class="col-lg-6">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm text-center p-4">
+                        <i class="fas fa-phone fa-3x text-success mb-3"></i>
+                        <h6>Call Us</h6>
+                        <p class="small mb-0">{{ about.phone }}</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm text-center p-4">
+                        <i class="fas fa-clock fa-3x text-success mb-3"></i>
+                        <h6>Working Hours</h6>
+                        <p class="small mb-0">{{ about.working_hours|linebreaks|truncatewords:5 }}</p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm text-center p-4">
+                        <i class="fas fa-map-marker-alt fa-3x text-success mb-3"></i>
+                        <h6>Visit Us</h6>
+                        <p class="small mb-0">{{ about.address|truncatewords:15 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 2. Services Section -->
+{% if services %}
+<section id="services" class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Our Services</h2>
+            <p class="lead text-muted">Comprehensive healthcare services for you and your family</p>
+        </div>
+        <div class="row g-4">
+            {% for service in services %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow hover-lift">
+                    {% if service.image %}
+                    <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas {{ service.icon }} fa-4x text-success"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ service.name }}</h5>
+                        <p class="card-text text-muted">{{ service.description|truncatewords:20 }}</p>
+                        {% if service.schedule %}
+                        <p class="small"><i class="fas fa-clock text-success me-2"></i>{{ service.schedule }}</p>
+                        {% endif %}
+                        <a href="{% url 'healthcenter:service_detail' service.slug %}" class="btn btn-outline-success btn-sm">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'healthcenter:services' %}" class="btn btn-success btn-lg">View All Services</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 3. Announcements Section -->
+{% if announcements %}
+<section id="announcements" class="container mb-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Latest Announcements</h2>
+        <p class="lead text-muted">Stay informed about health updates and important news</p>
+    </div>
+    <div class="row g-4">
+        {% for announcement in announcements %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow hover-lift">
+                {% if announcement.image %}
+                <img src="{{ announcement.image.url }}" class="card-img-top" alt="{{ announcement.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if announcement.priority == 'urgent' %}
+                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>URGENT</span>
+                        {% elif announcement.priority == 'high' %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-circle me-1"></i>High Priority</span>
+                        {% elif announcement.priority == 'normal' %}
+                        <span class="badge bg-info">Important</span>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ announcement.title }}</h5>
+                    <p class="text-muted small mb-3">
+                        <i class="fas fa-calendar me-2"></i>{{ announcement.published_date|date:"F d, Y" }}
+                    </p>
+                    <p class="card-text">{{ announcement.content|striptags|truncatewords:25 }}</p>
+                    <a href="{% url 'healthcenter:announcement_detail' announcement.slug %}" class="btn btn-outline-success btn-sm">Read Full Announcement</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+        <a href="{% url 'healthcenter:announcements' %}" class="btn btn-success btn-lg">View All Announcements</a>
+    </div>
+</section>
+{% endif %}
+
+<!-- 4. Our Team Section -->
+{% if team_members %}
+<section id="team" class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Our Healthcare Team</h2>
+            <p class="lead text-muted">Meet our dedicated healthcare professionals</p>
+        </div>
+        <div class="row g-4">
+            {% for member in team_members %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow text-center hover-lift">
+                    {% if member.photo %}
+                    <img src="{{ member.photo.url }}" class="card-img-top" alt="{{ member.name }}" style="height: 280px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 280px;">
+                        <i class="fas fa-user-md fa-5x text-success"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title mb-1">{{ member.name }}</h6>
+                        <p class="text-success small mb-2">{{ member.get_display_position }}</p>
+                        {% if member.specialization %}
+                        <p class="text-muted small mb-0"><i class="fas fa-stethoscope me-1"></i>{{ member.specialization }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'healthcenter:team' %}" class="btn btn-success btn-lg">View Full Team</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 5. Locations Section -->
+{% if locations %}
+<section id="locations" class="container mb-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Our Locations</h2>
+        <p class="lead text-muted">Find a health center near you</p>
+    </div>
+    <div class="row g-4">
+        {% for location in locations %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow hover-lift">
+                {% if location.image %}
+                <img src="{{ location.image.url }}" class="card-img-top" alt="{{ location.name }}" style="height: 180px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ location.name }}
+                        {% if location.is_main_office %}
+                        <span class="badge bg-success ms-2">Main Office</span>
+                        {% endif %}
+                    </h5>
+                    <div class="mb-3">
+                        <p class="mb-2"><i class="fas fa-map-marker-alt text-success me-2"></i>{{ location.address|truncatewords:12 }}</p>
+                        <p class="mb-2"><i class="fas fa-phone text-success me-2"></i>{{ location.phone }}</p>
+                        {% if location.email %}
+                        <p class="mb-2"><i class="fas fa-envelope text-success me-2"></i>{{ location.email }}</p>
+                        {% endif %}
+                        <p class="mb-2"><i class="fas fa-clock text-success me-2"></i>{{ location.working_hours|linebreaks|truncatewords:8 }}</p>
+                    </div>
+                    <a href="{{ location.get_google_maps_url }}" target="_blank" class="btn btn-outline-success btn-sm me-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>View on Map
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+        <a href="{% url 'healthcenter:locations' %}" class="btn btn-success btn-lg">View All Locations with Maps</a>
+    </div>
+</section>
+{% endif %}
+
+<!-- 6. Contact Section -->
+<section id="contact" class="bg-success text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="display-5 fw-bold mb-4">Get In Touch</h2>
+                <p class="lead mb-4">Have questions or need medical assistance? We're here to help!</p>
+
+                {% if about %}
+                <div class="mb-4">
+                    <h5><i class="fas fa-phone me-2"></i>Call Us</h5>
+                    <p class="h4 mb-4">{{ about.phone }}</p>
+
+                    <h5><i class="fas fa-envelope me-2"></i>Email Us</h5>
+                    <p class="h5 mb-4">{{ about.email }}</p>
+
+                    <h5><i class="fas fa-clock me-2"></i>Working Hours</h5>
+                    <p>{{ about.working_hours|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <h4 class="text-dark mb-4">Send Us a Message</h4>
+                        <p class="text-muted mb-4">Fill out our contact form and we'll get back to you as soon as possible.</p>
+                        <a href="{% url 'healthcenter:contact' %}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Go to Contact Form
+                        </a>
+
+                        <div class="mt-4 text-center">
+                            <p class="text-muted mb-2">Or visit us at:</p>
+                            {% if about %}
+                            <p class="text-dark"><i class="fas fa-map-marker-alt text-success me-2"></i>{{ about.address|truncatewords:15 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="container my-5">
+    <div class="card border-0 bg-primary bg-opacity-10 shadow-lg">
+        <div class="card-body p-5 text-center">
+            <h2 class="display-6 fw-bold text-success mb-3">Need Immediate Medical Assistance?</h2>
+            <p class="lead mb-4">Contact us for appointments, inquiries, or emergency services</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'healthcenter:contact' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-envelope me-2"></i>Contact Us
+                </a>
+                {% if about %}
+                <a href="tel:{{ about.phone }}" class="btn btn-outline-success btn-lg">
+                    <i class="fas fa-phone me-2"></i>Call {{ about.phone }}
+                </a>
+                {% endif %}
+                <a href="{% url 'healthcenter:services' %}" class="btn btn-outline-success btn-lg">
+                    <i class="fas fa-heartbeat me-2"></i>View Services
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+</style>
+{% endblock %}

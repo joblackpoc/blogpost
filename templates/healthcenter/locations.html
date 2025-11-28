@@ -1,0 +1,44 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}Locations | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Our Locations</h1>
+    
+    <div class="row g-4">
+        {% for location in locations %}
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ location.name }}
+                        {% if location.is_main_office %}<span class="badge bg-success">Main Office</span>{% endif %}
+                    </h5>
+                    {% if location.image %}<img src="{{ location.image.url }}" class="img-fluid mb-3" alt="{{ location.name }}">{% endif %}
+                    <p><i class="fas fa-map-marker-alt text-success me-2"></i>{{ location.address }}</p>
+                    <p><i class="fas fa-phone text-success me-2"></i>{{ location.phone }}</p>
+                    <p><i class="fas fa-clock text-success me-2"></i>{{ location.working_hours }}</p>
+                    <a href="{{ location.get_google_maps_url }}" target="_blank" class="btn btn-success btn-sm mb-3">
+                        <i class="fas fa-map-marked-alt me-1"></i>View on Google Maps
+                    </a>
+
+                    {% if location.get_google_maps_embed_url %}
+                    <div class="ratio ratio-16x9 mt-3">
+                        <iframe src="{{ location.get_google_maps_embed_url }}"
+                                style="border:0;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">No locations available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

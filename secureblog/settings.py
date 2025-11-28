@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     
     # Third-party apps
     'django_otp',
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'blog.apps.BlogConfig',
     'security.apps.SecurityConfig',
+    'healthcenter.apps.HealthcenterConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,73 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}Contact Us | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Contact Us</h1>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Send Us a Message</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.subject.label }}</label>
+                            {{ form.subject }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.message.label }}</label>
+                            {{ form.message }}
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Contact Information</h4>
+                    {% if about %}
+                    <p><i class="fas fa-phone text-success me-2"></i> {{ about.phone }}</p>
+                    <p><i class="fas fa-envelope text-success me-2"></i> {{ about.email }}</p>
+                    <p><i class="fas fa-map-marker-alt text-success me-2"></i> {{ about.address }}</p>
+                    <p><i class="fas fa-clock text-success me-2"></i> {{ about.working_hours|linebreaks }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if main_location and main_location.get_google_maps_embed_url %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Find Us</h4>
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ main_location.get_google_maps_embed_url }}"
+                                style="border:0;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

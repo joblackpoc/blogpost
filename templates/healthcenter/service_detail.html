@@ -1,0 +1,66 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}{{ service.name }} | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:services' %}">Services</a></li>
+            <li class="breadcrumb-item active">{{ service.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                {% if service.image %}<img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">{% endif %}
+                <div class="card-body p-5">
+                    <h1 class="mb-4"><i class="fas {{ service.icon }} text-success me-3"></i>{{ service.name }}</h1>
+                    <p class="lead">{{ service.description }}</p>
+                    
+                    {% if service.details %}
+                    <h4 class="mt-4 mb-3">Service Details</h4>
+                    <p>{{ service.details|linebreaks }}</p>
+                    {% endif %}
+                    
+                    {% if service.requirements %}
+                    <h4 class="mt-4 mb-3">What to Bring</h4>
+                    <p>{{ service.requirements|linebreaks }}</p>
+                    {% endif %}
+                    
+                    {% if service.schedule %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-clock me-2"></i><strong>Schedule:</strong> {{ service.schedule }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Need This Service?</h5>
+                    <p class="card-text">Contact us to schedule an appointment or for more information.</p>
+                    <a href="{% url 'healthcenter:contact' %}" class="btn btn-success w-100">Contact Us</a>
+                </div>
+            </div>
+            
+            {% if related_services %}
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Related Services</h5>
+                    <ul class="list-unstyled">
+                        {% for related in related_services %}
+                        <li class="mb-2"><a href="{% url 'healthcenter:service_detail' related.slug %}">{{ related.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

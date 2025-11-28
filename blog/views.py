@@ -6,8 +6,9 @@ from django.db.models import Q, Count
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
 import logging
-from .models import Post, Comment, Category, PostLike
+from .models import Post, Comment, Category, PostLike, Tag
 from .forms import PostForm, CommentForm, CategoryForm
+from .utils import fetch_link_preview
 
 logger = logging.getLogger('security')
 
@@ -60,12 +61,46 @@ def post_detail(request, slug):
     })
 
 @login_required
+@require_POST
+def fetch_link_preview_api(request):
+    """API endpoint to fetch link preview metadata"""
+    url = request.POST.get('url', '').strip()
+
+    if not url:
+        return JsonResponse({'success': False, 'error': 'URL is required'}, status=400)
+
+    metadata = fetch_link_preview(url)
+
+    if metadata:
+        return JsonResponse({
+            'success': True,
+            'data': metadata
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'error': 'Could not fetch link preview'
+        }, status=400)
+
+@login_required
 def post_create(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
+
+            # Fetch link preview metadata if link_url is provided and fields are empty
+            if post.link_url:
+                # Only fetch if user hasn't manually provided metadata
+                if not post.link_title and not post.link_description and not post.link_image:
+                    metadata = fetch_link_preview(post.link_url)
+                    if metadata:
+                        post.link_title = metadata.get('title')
+                        post.link_description = metadata.get('description')
+                        post.link_image = metadata.get('image')
+                        post.link_video = metadata.get('video')
+
             post.save()
             messages.success(request, 'Post created!')
             return redirect('blog:post_detail', slug=post.slug)
@@ -78,11 +113,24 @@ def post_edit(request, slug):
     post = get_object_or_404(Post, slug=slug)
     if post.author != request.user and not request.user.is_staff:
         return HttpResponseForbidden()
-    
+
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            post = form.save()
+            post = form.save(commit=False)
+
+            # Fetch link preview metadata if link_url is provided and fields are empty
+            if post.link_url:
+                # Only fetch if user hasn't manually provided metadata
+                if not post.link_title and not post.link_description and not post.link_image:
+                    metadata = fetch_link_preview(post.link_url)
+                    if metadata:
+                        post.link_title = metadata.get('title')
+                        post.link_description = metadata.get('description')
+                        post.link_image = metadata.get('image')
+                        post.link_video = metadata.get('video')
+
+            post.save()
             messages.success(request, 'Post updated!')
             return redirect('blog:post_detail', slug=post.slug)
     else:
@@ -160,6 +208,14 @@ def category_posts(request, slug):
     paginator = Paginator(posts, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
     return render(request, 'blog/category_posts.html', {'category': category, 'page_obj': page_obj})
+
+def tag_posts(request, slug):
+    """View posts filtered by tag/hashtag"""
+    tag = get_object_or_404(Tag, slug=slug)
+    posts = Post.objects.filter(tags=tag, status='published').select_related('author', 'category').annotate(like_count=Count('likes'))
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'blog/tag_posts.html', {'tag': tag, 'page_obj': page_obj})
 
 @login_required
 def category_list(request):

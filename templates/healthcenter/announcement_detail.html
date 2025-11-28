@@ -1,0 +1,42 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}{{ announcement.title }} | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'healthcenter:announcements' %}">Announcements</a></li>
+            <li class="breadcrumb-item active">{{ announcement.title|truncatewords:5 }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <article class="card shadow">
+                {% if announcement.image %}<img src="{{ announcement.image.url }}" class="card-img-top" alt="{{ announcement.title }}">{% endif %}
+                <div class="card-body p-5">
+                    {% if announcement.priority == 'urgent' %}<span class="badge bg-danger mb-3">URGENT</span>
+                    {% elif announcement.priority == 'high' %}<span class="badge bg-warning mb-3">High Priority</span>{% endif %}
+                    
+                    <h1 class="mb-3">{{ announcement.title }}</h1>
+                    
+                    <div class="d-flex text-muted mb-4">
+                        <span class="me-3"><i class="fas fa-calendar me-2"></i>{{ announcement.published_date|date:"F d, Y" }}</span>
+                        <span><i class="fas fa-eye me-2"></i>{{ announcement.views }} views</span>
+                    </div>
+                    
+                    <div class="announcement-content">
+                        {{ announcement.content|linebreaks }}
+                    </div>
+                </div>
+            </article>
+            
+            <div class="mt-4 text-center">
+                <a href="{% url 'healthcenter:announcements' %}" class="btn btn-outline-success">Back to Announcements</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'healthcenter/base_healthcenter.html' %}
+
+{% block title %}Announcements | Public Health Center{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Health Announcements</h1>
+    
+    <div class="row g-4">
+        {% for announcement in announcements %}
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                {% if announcement.image %}<img src="{{ announcement.image.url }}" class="card-img-top" alt="{{ announcement.title }}">{% endif %}
+                <div class="card-body">
+                    {% if announcement.priority == 'urgent' %}<span class="badge bg-danger">URGENT</span>
+                    {% elif announcement.priority == 'high' %}<span class="badge bg-warning">High Priority</span>{% endif %}
+                    <h5 class="card-title mt-2">{{ announcement.title }}</h5>
+                    <p class="text-muted small"><i class="fas fa-calendar me-2"></i>{{ announcement.published_date|date:"F d, Y" }}</p>
+                    <p>{{ announcement.content|truncatewords:30 }}</p>
+                    <a href="{% url 'healthcenter:announcement_detail' announcement.slug %}" class="btn btn-success">Read Full Announcement</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">No announcements at this time.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

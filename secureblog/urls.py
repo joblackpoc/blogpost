@@ -7,6 +7,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.contrib.sitemaps.views import sitemap
+from healthcenter.sitemaps import ServiceSitemap, AnnouncementSitemap, LocationSitemap
+
+sitemaps = {
+    'services': ServiceSitemap,
+    'announcements': AnnouncementSitemap,
+    'locations': LocationSitemap,
+}
 
 handler400 = 'security.views.handler400'
 handler403 = 'security.views.handler403'
@@ -19,8 +27,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('blog/', include('blog.urls')),
     path('security/', include('security.urls')),
+    path('healthcenter/', include('healthcenter.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-    path('', RedirectView.as_view(url='/blog/', permanent=False)),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('', include('healthcenter.urls')),  # Redirect root to healthcenter app
 ]
 
 if settings.DEBUG:
